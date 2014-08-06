@@ -6,8 +6,26 @@ var shell   = require('shelljs'),
     colors  = require('colors'),
     _       = require('underscore'),
 
+    dino = ['            __',
+            '           / o)',
+            '    .-^^^-/ /',
+            ' __/       /',
+            '<__.|_|-|_|'],
 
-    opts  = nom.script('deploy')
+    intro = function(message) {
+        console.log();
+        dino[1] += sprintf(' %s'.white.bold, message);
+        console.log(dino[0].green);
+        console.log(dino[1].green);
+        dino.splice(0, 2);
+        _.each(dino, function(line) {
+            console.log(line.green);
+        });
+        console.log();
+    }
+
+
+    opts = nom.script('deploy')
         .option('bump', {
             abbr:     'b',
             choices:  ['major', 'minor', 'patch'],
@@ -33,6 +51,10 @@ var shell   = require('shelljs'),
         .option('message', {
             help:    'Commit message to use for the merge. {VERSION} will be replaced with the new version',
             default: '{VERSION}'
+        })
+        .option('origin', {
+            help:    'The remote to push master to',
+            default: 'origin'
         })
         .parse(),
 
@@ -126,6 +148,7 @@ var shell   = require('shelljs'),
         }
     };
 
+intro('DEPLOYING'.bold + sprintf(' %s to %s:%s', opts.dev, opts.origin, opts.master));
 
 log.debug(sprintf('Checking out branch %s', opts.master));
 
