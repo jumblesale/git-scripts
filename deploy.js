@@ -36,7 +36,7 @@ var shell   = require('shelljs'),
 
     log = {
         debug: function(message) {
-            if(opts.debug || true) {
+            if(opts.verbose) {
                 this.info(sprintf('DEBUG: %s', message));
             }
         },
@@ -71,13 +71,16 @@ var shell   = require('shelljs'),
             return shell.exec(sprintf('git commit -m"%s"', message), {silent: true}).output.trim();
         },
         tag: function(version, message, commit) {
-            return shell.exec(sprintf('git tag -a %s -m"%s" %s', version, message, commit)).output.trim();
+            return shell.exec(sprintf('git tag -a %s -m"%s" %s', version, message, commit), {silent: true}).output.trim();
         },
         push: function(branch, upstream) {
-            return shell.exec(sprintf('git push %s %s', upstream, branch)).output.trim();
+            return shell.exec(sprintf('git push %s %s', upstream, branch), {silent: true}).output.trim();
+        },
+        pushTags: function(branch, upstream) {
+            return shell.exec(sprintf('git push %s %s --tags', upstream, branch), {silent: true}).output.trim();
         },
         fetch: function(branch, upstream) {
-            return shell.exec(sprintf('git fetch %s %s --tags', upstream, branch)).output.trim();
+            return shell.exec(sprintf('git fetch %s %s --tags', upstream, branch), {silent: true}).output.trim();
         }
     },
 
@@ -152,3 +155,7 @@ git.tag(newTag, newTag, 'HEAD');
 log.debug(sprintf('Pushing %s', opts.master));
 
 log.info(git.push(opts.master, 'origin'));
+
+log.debug('Pushing tags...');
+
+log.info(git.pushTags(opts.master, 'origin'));
