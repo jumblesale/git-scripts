@@ -3,6 +3,7 @@ var shell   = require('shelljs'),
     nom     = require('nomnom'),
     sprintf = require('sprintf-js').sprintf
     util    = require('util'),
+    colors  = require('colors'),
     _       = require('underscore'),
 
 
@@ -14,9 +15,10 @@ var shell   = require('shelljs'),
             required: true
         })
         .option('verbose', {
-            abbr: 'v',
-            flag: true,
-            help: 'Fill up your terminal',
+            abbr:    'v',
+            flag:    true,
+            help:    'Fill up your terminal',
+            default: false
         })
         .option('master', {
             abbr:    'm',
@@ -36,15 +38,15 @@ var shell   = require('shelljs'),
 
     log = {
         debug: function(message) {
-            if(opts.verbose) {
-                this.info(sprintf('DEBUG: %s', message));
+            if(true === opts.verbose) {
+                this.info(sprintf('%s %s', 'DEBUG:'.cyan.inverse, message));
             }
         },
         fatal: function(message) {
-            console.error(sprintf('DEPLOY: FATAL: %s', message));
+            console.error(sprintf('FATAL: %s', message).red.inverse);
         },
         info: function(message) {
-            console.log(sprintf('DEPLOY: %s', message));
+            console.log(sprintf('%s %s', 'DEPLOY:'.grey.bold.inverse, message));
         }
     },
 
@@ -161,5 +163,3 @@ git.tag(newTag, newTag, 'HEAD');
 log.debug(sprintf('Pushing %s', opts.master));
 
 log.info(git.push(opts.master, 'origin'));
-
-log.info(git.pushTags(opts.master, 'origin'));
