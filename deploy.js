@@ -22,7 +22,7 @@ var shell   = require('shelljs'),
             console.log(line.green);
         });
         console.log();
-    }
+    },
 
 
     opts = nom.script('deploy')
@@ -98,10 +98,30 @@ var shell   = require('shelljs'),
             return shell.exec(sprintf('git tag -a %s -m"%s" %s', version, message, commit), {silent: true}).output.trim();
         },
         push: function(branch, upstream) {
-            result = shell.exec(sprintf('git push %s %s --tags', upstream, branch), {silent: true})
+            result = shell.exec(sprintf('git push %s %s', upstream, branch), {silent: true})
 
             if(0 !== result.code) {
                 log.fatal(sprintf('Could not push %s:%s, aborting', upstream, branch));
+                shell.exit(1);
+            }
+
+            return result.output.trim();
+        },
+        pull: function(branch, upstream) {
+            result = shell.exec(sprintf('git pull %s %s', upstream, branch), {silent: true});
+
+            if(0 !== result.code) {
+                log.fatal(sprintf('Could not pull %s:%s, aborting', upstream, branch));
+                shell.exit(1);
+            }
+
+            return result.output.trim();
+        },
+        pushTags: function(branch, upstream) {
+            result = shell.exec(sprintf('git push --tags %s %s', upstream, branch), {silent: true})
+
+            if(0 !== result.code) {
+                log.fatal(sprintf('Could not push tags to %s:%s, aborting', upstream, branch));
                 shell.exit(1);
             }
 
@@ -158,6 +178,14 @@ log.debug('Fetching latest changes');
 
 log.info(git.fetch(opts.master, 'origin'));
 
+log.debug('Checking out latest changes');
+
+log.info(git.pull(opts.master, 'origin'));
+
+log.debug('Fetching latest changes');
+
+log.info(git.fetch(opts.master, 'origin'));
+
 var lastTag = git.lastTag();
 
 log.debug(sprintf('Last tag found is %s', lastTag));
@@ -186,3 +214,7 @@ git.tag(newTag, newTag, 'HEAD');
 log.debug(sprintf('Pushing %s', opts.master));
 
 log.info(git.push(opts.master, 'origin'));
+
+log.debug('Pushing tags');
+
+log.info(git.pushTags(opts.master, 'origin'));
