@@ -74,13 +74,24 @@ var shell   = require('shelljs'),
             return shell.exec(sprintf('git tag -a %s -m"%s" %s', version, message, commit), {silent: true}).output.trim();
         },
         push: function(branch, upstream) {
-            return shell.exec(sprintf('git push %s %s', upstream, branch), {silent: true}).output.trim();
-        },
-        pushTags: function(branch, upstream) {
-            return shell.exec(sprintf('git push %s %s --tags', upstream, branch), {silent: true}).output.trim();
+            result = shell.exec(sprintf('git push %s %s --tags', upstream, branch), {silent: true})
+
+            if(0 !== result.code) {
+                log.fatal(sprintf('Could not push %s:%s, aborting', upstream, branch));
+                shell.exit(1);
+            }
+
+            return result.output.trim();
         },
         fetch: function(branch, upstream) {
-            return shell.exec(sprintf('git fetch %s %s --tags', upstream, branch), {silent: true}).output.trim();
+            result = shell.exec(sprintf('git fetch %s %s --tags', upstream, branch), {silent: true});
+
+            if(0 !== result.code) {
+                log.fatal(sprintf('Could not fetch %s:%s, aborting', upstream, branch));
+                shell.exit(1);
+            }
+
+            return result.output.trim();
         }
     },
 
@@ -127,12 +138,7 @@ var lastTag = git.lastTag();
 log.debug(sprintf('Last tag found is %s', lastTag));
 
 if(!lastTag) {
-    log.fatal('No tags found, giving up');
-    shell.exit(1);
-}
-
-if(!tag.hasCorrectFormat(lastTag)) {
-    log.fatal(sprintf('Could not parse tag %s, expecting a tag with the format [v(ersion)]x.x.x', lastTag));
+    log.fatal('No valid tags found. Tags should have format [v]x.x.x');
     shell.exit(1);
 }
 
@@ -155,7 +161,5 @@ git.tag(newTag, newTag, 'HEAD');
 log.debug(sprintf('Pushing %s', opts.master));
 
 log.info(git.push(opts.master, 'origin'));
-
-log.debug('Pushing tags...');
 
 log.info(git.pushTags(opts.master, 'origin'));
