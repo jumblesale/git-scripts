@@ -176,15 +176,15 @@ log.info(git.checkout(opts.master));
 
 log.debug('Fetching latest changes');
 
-log.info(git.fetch(opts.master, 'origin'));
+log.info(git.fetch(opts.master, opts.origin));
 
 log.debug('Checking out latest changes');
 
-log.info(git.pull(opts.master, 'origin'));
+log.info(git.pull(opts.master, opts.origin));
 
 log.debug('Fetching latest changes');
 
-log.info(git.fetch(opts.master, 'origin'));
+log.info(git.fetch(opts.master, opts.origin));
 
 var lastTag = git.lastTag();
 
@@ -213,8 +213,8 @@ git.tag(newTag, newTag, 'HEAD');
 
 log.debug(sprintf('Pushing %s', opts.master));
 
-log.info(git.push(opts.master, 'origin'));
+log.info(git.push(opts.master, opts.origin));
 
 log.debug('Pushing tags');
 
-log.info(git.pushTags(opts.master, 'origin'));
+log.info(git.pushTags(opts.master, opts.origin));
