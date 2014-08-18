@@ -38,6 +38,9 @@ var shell   = require('shelljs'),
             help:    'Fill up your terminal',
             default: false
         })
+        .option('version', {
+            help: 'Specify the new version to use'
+        })
         .option('master', {
             abbr:    'm',
             help:    'Target branch for the merge - default \'master\'',
@@ -186,18 +189,20 @@ log.debug('Fetching latest changes');
 
 log.info(git.fetch(opts.master, opts.origin));
 
-var lastTag = git.lastTag();
+var newTag = opt.version
+    ? opts.version
+    : function(lastTag) {
+        log.debug(sprintf('Last tag found is %s', lastTag));
 
-log.debug(sprintf('Last tag found is %s', lastTag));
+        if(!lastTag) {
+            log.fatal('No valid tags found and no new version explicitly specified. Tags should have format [v]x.x.x');
+            shell.exit(1);
+        }
 
-if(!lastTag) {
-    log.fatal('No valid tags found. Tags should have format [v]x.x.x');
-    shell.exit(1);
-}
+        log.debug(sprintf('Doing a %s bump to the version', opts.bump));
 
-log.debug(sprintf('Doing a %s bump to the version', opts.bump));
-
-var newTag = tag.bump(opts.bump, lastTag);
+        return tag.bump(opts.bump, lastTag);
+    } (git.lastTag());
 
 log.debug(sprintf('New tag will be %s', newTag));
 
