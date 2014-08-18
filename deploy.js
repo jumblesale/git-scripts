@@ -6,23 +6,10 @@ var shell   = require('shelljs'),
     colors  = require('colors'),
     _       = require('underscore'),
 
-    dino = ['            __',
-            '           / o)',
-            '    .-^^^-/ /',
-            ' __/       /',
-            '<__.|_|-|_|'],
-
-    intro = function(message) {
-        console.log();
-        dino[1] += sprintf(' %s'.white.bold, message);
-        console.log(dino[0].green);
-        console.log(dino[1].green);
-        dino.splice(0, 2);
-        _.each(dino, function(line) {
-            console.log(line.green);
-        });
-        console.log();
-    },
+    dino    = require('./modules/dino'),
+    git     = require('./modules/git'),
+    log     = require('./modules/log'),
+    tag     = require('./modules/tag'),
 
 
     opts = nom.script('deploy')
@@ -59,138 +46,9 @@ var shell   = require('shelljs'),
             help:    'The remote to push master to',
             default: 'origin'
         })
-        .parse(),
+        .parse();
 
-    log = {
-        debug: function(message) {
-            if(true === opts.verbose) {
-                this.info(sprintf('%s %s', 'DEBUG:'.cyan.inverse, message));
-            }
-        },
-        fatal: function(message) {
-            console.error(sprintf('FATAL: %s', message).red.inverse);
-        },
-        info: function(message) {
-            console.log(sprintf('%s %s', 'DEPLOY:'.grey.bold.inverse, message));
-        }
-    },
-
-    git = {
-        checkout: function(branch) {
-            return shell.exec(sprintf('git checkout %s', branch), {silent: true}).output.trim();
-        },
-        checkoutFile: function(branch, file) {
-            return shell.exec(sprintf('git checkout %s -- %s', branch, file), {silent: true})
-                .output
-                .trim();
-        },
-        lastTag: function() {
-            var tags = shell
-                .exec('git tag -l | sort -V', {silent: true})
-                .output
-                .trim()
-                .split("\n")
-                .reverse();
-
-            return _.find(tags, function(line) {
-                return tag.hasCorrectFormat(line);
-            });
-        },
-        squash: function(branch) {
-            var files = shell
-                .exec(sprintf('git diff --name-only --diff-filter=U', branch), {silent: true})
-                .output
-                .trim()
-                .split("\n");
-
-            _.each(files, function(file) {
-                git.checkoutFile(branch, file);
-            })
-        },
-        squashMerge: function(branch) {
-            return shell.exec(sprintf('git merge -X theirs %s --squash', branch), {silent: true}).output.trim();
-        },
-        softReset: function(branch) {
-            return shell.exec(sprintf('git reset --soft %s', branch), {silent: true}).output.trim();
-        },
-        commit: function(message) {
-            return shell.exec(sprintf('git commit -m"%s"', message), {silent: true}).output.trim();
-        },
-        tag: function(version, message, commit) {
-            return shell.exec(sprintf('git tag -a %s -m"%s" %s', version, message, commit), {silent: true}).output.trim();
-        },
-        push: function(branch, upstream) {
-            result = shell.exec(sprintf('git push %s %s', upstream, branch), {silent: true})
-
-            if(0 !== result.code) {
-                log.fatal(sprintf('Could not push %s:%s, aborting', upstream, branch));
-                shell.exit(1);
-            }
-
-            return result.output.trim();
-        },
-        pull: function(branch, upstream) {
-            result = shell.exec(sprintf('git pull %s %s', upstream, branch), {silent: true});
-
-            if(0 !== result.code) {
-                log.fatal(sprintf('Could not pull %s:%s, aborting', upstream, branch));
-                shell.exit(1);
-            }
-
-            return result.output.trim();
-        },
-        pushTags: function(branch, upstream) {
-            result = shell.exec(sprintf('git push --tags %s %s', upstream, branch), {silent: true})
-
-            if(0 !== result.code) {
-                log.fatal(sprintf('Could not push tags to %s:%s, aborting', upstream, branch));
-                shell.exit(1);
-            }
-
-            return result.output.trim();
-        },
-        fetch: function(branch, upstream) {
-            result = shell.exec(sprintf('git fetch %s %s --tags', upstream, branch), {silent: true});
-
-            if(0 !== result.code) {
-                log.fatal(sprintf('Could not fetch %s:%s, aborting', upstream, branch));
-                shell.exit(1);
-            }
-
-            return result.output.trim();
-        }
-    },
-
-    tag = {
-        regex: /^(.*)?(\d+)\.(\d+)\.(\d+)$/,
-
-        versionMap: {
-            major: 1,
-            minor: 2,
-            patch: 3
-        },
-
-        hasCorrectFormat: function(tag) {
-            return this.regex.test(tag);
-        },
-
-        bump: function(version, tag) {
-            var index = this.versionMap[version] + 1;
-
-            parts = this.regex.exec(tag);
-            parts[index] = (parseInt(parts[index], 10) + 1) + '';
-            if(2 === index) {
-                parts[index + 2] = '0';
-                parts[index + 1] = '0';
-            }
-            if(3 === index) {
-                parts[index + 1] = '0';
-            }
-            return sprintf('%s%s.%s.%s', parts[1], parts[2], parts[3], parts[4]);
-        }
-    };
-
-intro('DEPLOYING'.bold + sprintf(' %s to %s:%s', opts.dev, opts.origin, opts.master));
+dino.say('DEPLOYING'.bold + sprintf(' %s to %s:%s', opts.dev, opts.origin, opts.master));
 
 log.debug(sprintf('Checking out branch %s', opts.master));
 

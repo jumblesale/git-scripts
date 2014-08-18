@@ -4,6 +4,7 @@ var shell   = require('shelljs'),
     prompt  = require('prompt');
     sprintf = require('sprintf-js').sprintf,
     nom     = require('nomnom'),
+    colors  = require('colors')
 
     opts = nom.script('deploy')
         .option('origin', {
