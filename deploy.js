@@ -77,7 +77,12 @@ var shell   = require('shelljs'),
 
     git = {
         checkout: function(branch) {
-            return shell.exec(sprintf('git checkout %s', opts.master), {silent: true}).output.trim();
+            return shell.exec(sprintf('git checkout %s', branch), {silent: true}).output.trim();
+        },
+        checkoutFile: function(branch, file) {
+            return shell.exec(sprintf('git checkout %s -- %s', branch, file), {silent: true})
+                .output
+                .trim();
         },
         lastTag: function() {
             var tags = shell
@@ -91,8 +96,22 @@ var shell   = require('shelljs'),
                 return tag.hasCorrectFormat(line);
             });
         },
+        squash: function(branch) {
+            var files = shell
+                .exec(sprintf('git diff --name-only --diff-filter=U', branch), {silent: true})
+                .output
+                .trim()
+                .split("\n");
+
+            _.each(files, function(file) {
+                git.checkoutFile(branch, file);
+            })
+        },
         squashMerge: function(branch) {
             return shell.exec(sprintf('git merge -X theirs %s --squash', branch), {silent: true}).output.trim();
+        },
+        softReset: function(branch) {
+            return shell.exec(sprintf('git reset --soft %s', branch), {silent: true}).output.trim();
         },
         commit: function(message) {
             return shell.exec(sprintf('git commit -m"%s"', message), {silent: true}).output.trim();
@@ -189,15 +208,15 @@ log.debug('Fetching latest changes');
 
 log.info(git.fetch(opts.master, opts.origin));
 
-var newTag = opt.version
+var newTag = opts.version
     ? opts.version
     : function(lastTag) {
-        log.debug(sprintf('Last tag found is %s', lastTag));
-
         if(!lastTag) {
             log.fatal('No valid tags found and no new version explicitly specified. Tags should have format [v]x.x.x');
             shell.exit(1);
         }
+
+        log.debug(sprintf('Last tag found is %s', lastTag));
 
         log.debug(sprintf('Doing a %s bump to the version', opts.bump));
 
@@ -206,11 +225,19 @@ var newTag = opt.version
 
 log.debug(sprintf('New tag will be %s', newTag));
 
-log.debug(sprintf('Squash merging %s into %s...', opts.dev, opts.master));
+log.debug(sprintf('Squashing %s', opts.dev));
 
-log.info(git.squashMerge(opts.dev));
+git.squashMerge(opts.dev);
 
-log.info(git.commit(opts.message.replace('{VERSION}', newTag)));
+log.info(sprintf('Resolving conflicts in favour of %s', opts.dev));
+
+git.squash(opts.dev);
+
+var message = opts.message.replace('{VERSION}', newTag);
+
+log.info(sprintf('Committing with message: %s', message));
+
+log.info(git.commit(message));
 
 log.debug('Tagging new commit...');
 
