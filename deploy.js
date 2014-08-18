@@ -1,15 +1,10 @@
 #!/usr/bin/nodejs
 var shell   = require('shelljs'),
     nom     = require('nomnom'),
-    sprintf = require('sprintf-js').sprintf
+    sprintf = require('sprintf-js').sprintf,
     util    = require('util'),
     colors  = require('colors'),
     _       = require('underscore'),
-
-    dino    = require('./modules/dino'),
-    git     = require('./modules/git'),
-    log     = require('./modules/log'),
-    tag     = require('./modules/tag'),
 
 
     opts = nom.script('deploy')
@@ -46,7 +41,12 @@ var shell   = require('shelljs'),
             help:    'The remote to push master to',
             default: 'origin'
         })
-        .parse();
+        .parse(),
+
+    dino    = require('./modules/dino'),
+    git     = require('./modules/git'),
+    log     = require('./modules/log')(opts.verbose),
+    tag     = require('./modules/tag');
 
 dino.say('DEPLOYING'.bold + sprintf(' %s to %s:%s', opts.dev, opts.origin, opts.master));
 

@@ -1,5 +1,5 @@
 var sprintf = require('sprintf-js').sprintf,
-    Tag = {
+    tag = {
         regex: /^(.*)?(\d+)\.(\d+)\.(\d+)$/,
 
         versionMap: {
@@ -9,13 +9,13 @@ var sprintf = require('sprintf-js').sprintf,
         },
 
         hasCorrectFormat: function(tag) {
-            return Tag.regex.test(tag);
+            return this.regex.test(tag);
         },
 
         bump: function(version, tag) {
-            var index = Tag.versionMap[version] + 1;
+            var index = this.versionMap[version] + 1;
 
-            parts = Tag.regex.exec(tag);
+            parts = this.regex.exec(tag);
             parts[index] = (parseInt(parts[index], 10) + 1) + '';
             if(2 === index) {
                 parts[index + 2] = '0';
@@ -28,5 +28,4 @@ var sprintf = require('sprintf-js').sprintf,
         }
     };
 
-exports.bump             = Tag.bump;
-exports.hasCorrectFormat = Tag.hasCorrectFormat;
+module.exports = tag;

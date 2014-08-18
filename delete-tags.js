@@ -1,49 +1,42 @@
 #!/usr/bin/nodejs
-var shell   = require('shelljs'),
-    _       = require('underscore'),
-    prompt  = require('prompt');
-    sprintf = require('sprintf-js').sprintf,
-    nom     = require('nomnom'),
-    colors  = require('colors')
 
-    opts = nom.script('deploy')
+var sprintf = require('sprintf-js').sprintf,
+    shell   = require('shelljs'),
+    nom     = require('nomnom'),
+    prompt  = require('prompt'),
+    _       = require('underscore'),
+    dino    = require('./modules/dino'),
+
+    opts    = nom.script('deploy')
         .option('origin', {
-            abbr:     'b',
-            default:  'origin',
-            help:     'Upstream to delete tags from',
+            help:    'The remote to push master to',
+            default: 'origin'
         })
         .parse(),
 
-    origin = opts.origin,
+    origin = opts.origin;
 
-    dino = ['            __',
-            '           / o)',
-            '    .-^^^-/ /',
-            ' __/       /',
-            '<__.|_|-|_|'],
 
-    intro = function(message) {
-        console.log();
-        dino[1] += sprintf(' %s'.white.bold, message);
-        console.log(dino[0].green);
-        console.log(dino[1].green);
-        dino.splice(0, 2);
-        _.each(dino, function(line) {
-            console.log(line.green);
-        });
-        console.log();
-    };
-
-intro('DELETING TAGS'.bold + sprintf(' from current branch'));
+dino.say('DELETING TAGS'.bold + sprintf(' from current branch'));
 
 prompt.start();
+prompt.message   = 'This will delete ALL tags from the local and remote branch! BE SURE YOU WANT TO DO THIS!';
 
-prompt.get(['continue'], function (err, result) {
+prompt.get({
+    properties: {
+        continue: {
+            message: 'continue [y/N]?'
+        }
+    }
+}, function (err, result) {
+    if(!result) {
+        shell.exit(1);
+    }
+
     if('Y' !== result.continue.toUpperCase()) {
         shell.exit(1);
     }
 
-    
     var tags = shell
         .exec('git tag')
         .output
