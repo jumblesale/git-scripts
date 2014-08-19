@@ -1,6 +1,5 @@
 var shell   = require('shelljs'),
     sprintf = require('sprintf-js').sprintf,
-    log     = require('./log'),
     tag     = require('./tag'),
     _       = require('underscore'),
 
@@ -101,4 +100,7 @@ var shell   = require('shelljs'),
         }
     };
 
-module.exports = git;
+module.exports = function(logger) {
+    log = logger;
+    return git;
+}

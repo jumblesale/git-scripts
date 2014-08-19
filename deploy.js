@@ -44,8 +44,8 @@ var shell   = require('shelljs'),
         .parse(),
 
     dino    = require('./modules/dino'),
-    git     = require('./modules/git'),
     log     = require('./modules/log')(opts.verbose),
+    git     = require('./modules/git')(log),
     tag     = require('./modules/tag');
 
 dino.say('DEPLOYING'.bold + sprintf(' %s to %s:%s', opts.dev, opts.origin, opts.master));
