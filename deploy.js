@@ -99,7 +99,7 @@ log.info(git.commit(message));
 
 log.debug('Tagging new commit...');
 
-git.tag(newTag, newTag, 'HEAD');
+git.tag(newTag, newTag, git.lastCommitHash());
 
 log.debug(sprintf('Pushing %s', opts.master));
 

@@ -34,8 +34,12 @@ var shell   = require('shelljs'),
                 .trim()
                 .split("\n");
 
+            console.log(files);
+
             _.each(files, function(file) {
-                git.checkoutFile(branch, file);
+                if(file) {
+                    git.checkoutFile(branch, file);
+                }
             })
         },
 
@@ -49,6 +53,10 @@ var shell   = require('shelljs'),
 
         commit: function(message) {
             return shell.exec(sprintf('git commit -m"%s"', message), {silent: true}).output.trim();
+        },
+
+        lastCommitHash: function() {
+            return shell.exec('git rev-parse HEAD', {silent: true}).output.trim();
         },
 
         tag: function(version, message, commit) {
