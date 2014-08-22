@@ -1,4 +1,5 @@
 var sprintf = require('sprintf-js').sprintf,
+	colors  = require('colors'),
 	verbose = false,
 	log     = {
 		debug: function(message) {
@@ -16,7 +17,6 @@ var sprintf = require('sprintf-js').sprintf,
 		}
 	};
 
-// module.exports = log;
 module.exports = function(v) {
 	verbose = v;
 	return log;
