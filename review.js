@@ -1,5 +1,7 @@
 #!/usr/bin/nodejs
 
+"use strict"
+
 var GHAPI   = require('github'),
     request = require('request'),
     nom     = require('nomnom'),
@@ -37,6 +39,11 @@ var GHAPI   = require('github'),
         .option('token', {
             abbr: 't',
             help: 'GitHub token to use - leave blank to use the contents of .token'
+        })
+        .option('user', {
+            abbr: 'u',
+            help: 'The github user that the repo belongs to',
+            required: true
         })
         .parse(),
 
@@ -96,10 +103,10 @@ var GHAPI   = require('github'),
         });
     },
 
-    getPullRequests = function() {
+    getPullRequests = function(token) {
         var deferred = Q.defer();
         gh.pullRequests.getAll(
-            {user: 'crossrail', repo: opts.repo}, 
+            {user: opts.user, repo: opts.repo}, 
             function(err, result) {
                 if(err) {
                     return deferred.reject(err);
@@ -108,10 +115,10 @@ var GHAPI   = require('github'),
                 }
         });
         return deferred.promise;
-    };
+    },
 
     pullPR = function(pullRequest) {
-        var sha = pullRequest.head.sha,
+        var sha       = pullRequest.head.sha,
             localHEAD = git.lastCommitHash();
         log.info(sprintf('Fetching from %s', opts.origin));
         log.info(git.fetch(opts.origin));
@@ -121,15 +128,18 @@ var GHAPI   = require('github'),
             log.info(sprintf('Resetting to %s', localHEAD));
             log.info(git.softReset(localHEAD));
         }
-    }
+    },
 
-if(!opts.token) {
-    var file = fs.readFileSync(sprintf('%s/%s', __dirname, '.token'));
-    if(!file) {
-        log.fatal('No token specified and could not read .token');
-    }
-    token = file;
-}
+    token = function() {
+        if(opts.token) {
+            return opts.token
+        }
+        var file = fs.readFileSync(sprintf('%s/%s', __dirname, '.token'));
+        if(!file) {
+            log.fatal('No token specified and could not read .token');
+        }
+        return file;
+    }();
 
 dino.say('REVIEW'.bold + ' pull request');
 
