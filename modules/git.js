@@ -96,11 +96,22 @@ var shell   = require('shelljs'),
             return result.output.trim();
         },
 
-        fetch: function(branch, upstream) {
+        fetchTags: function(upstream, branch) {
             result = shell.exec(sprintf('git fetch %s %s --tags', upstream, branch), {silent: true});
 
             if(0 !== result.code) {
                 log.fatal(sprintf('Could not fetch %s:%s, aborting', upstream, branch));
+                shell.exit(1);
+            }
+
+            return result.output.trim();
+        },
+
+        fetch: function(upstream) {
+            result = shell.exec(sprintf('git fetch %s', upstream), {silent: true});
+
+            if(0 !== result.code) {
+                log.fatal(sprintf('Could not fetch from %s, aborting', upstream));
                 shell.exit(1);
             }
 
