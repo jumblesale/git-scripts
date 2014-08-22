@@ -44,7 +44,7 @@ var shell   = require('shelljs'),
         .parse(),
 
     dino    = require('./modules/dino'),
-    log     = require('./modules/log')(opts.verbose),
+    log     = require('./modules/log')('deploy', opts.verbose),
     git     = require('./modules/git')(log),
     tag     = require('./modules/tag');
 
@@ -56,15 +56,11 @@ log.info(git.checkout(opts.master));
 
 log.debug('Fetching latest changes');
 
-log.info(git.fetch(opts.master, opts.origin));
+log.info(git.fetchTags(opts.master, opts.origin));
 
 log.debug('Checking out latest changes');
 
 log.info(git.pull(opts.master, opts.origin));
-
-log.debug('Fetching latest changes');
-
-log.info(git.fetch(opts.master, opts.origin));
 
 var newTag = opts.version
     ? opts.version

@@ -34,8 +34,6 @@ var shell   = require('shelljs'),
                 .trim()
                 .split("\n");
 
-            console.log(files);
-
             _.each(files, function(file) {
                 if(file) {
                     git.checkoutFile(branch, file);
@@ -96,7 +94,7 @@ var shell   = require('shelljs'),
             return result.output.trim();
         },
 
-        fetchTags: function(upstream, branch) {
+        fetchTags: function(branch, upstream) {
             result = shell.exec(sprintf('git fetch %s %s --tags', upstream, branch), {silent: true});
 
             if(0 !== result.code) {
