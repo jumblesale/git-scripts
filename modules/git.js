@@ -27,22 +27,32 @@ var shell   = require('shelljs'),
             });
         },
 
-        squash: function(branch) {
-            var files = shell
-                .exec(sprintf('git diff --name-only --diff-filter=U', branch), {silent: true})
-                .output
-                .trim()
-                .split("\n");
+        squashMerge: function(branch) {
+            var diffMap = {
+                    A: function(branch, file) {
+                        return shell.exec(sprintf('git rm %s', file), {silent: true}).output.trim();
+                    },
+                    M: git.checkoutFile,
+                    D: git.checkoutFile
+                },
+
+                files = shell
+                    .exec(sprintf('git diff --name-status %s', branch), {silent: true})
+                    .output
+                    .trim()
+                    .split("\n");
+
+            shell.exec('git reset', {silent: true});
 
             _.each(files, function(file) {
-                if(file) {
-                    git.checkoutFile(branch, file);
-                }
-            })
-        },
+                var parts  = file.split("\t"),
+                    status = parts[0].trim(),
+                    path   = parts[1].trim(),
+                    action = diffMap[parts[0]];
 
-        squashMerge: function(branch) {
-            return shell.exec(sprintf('git merge -X theirs %s --squash', branch), {silent: true}).output.trim();
+                log.info(sprintf('%s: %s', status, path));
+                console.log(action(branch, parts[1]));
+            });
         },
 
         softReset: function(branch) {

@@ -83,10 +83,6 @@ log.debug(sprintf('Squashing %s', opts.dev));
 
 git.squashMerge(opts.dev);
 
-log.info(sprintf('Resolving conflicts in favour of %s', opts.dev));
-
-git.squash(opts.dev);
-
 var message = opts.message.replace('{VERSION}', newTag);
 
 log.info(sprintf('Committing with message: %s', message));
@@ -99,8 +95,8 @@ git.tag(newTag, newTag, git.lastCommitHash());
 
 log.debug(sprintf('Pushing %s', opts.master));
 
-log.info(git.push(opts.master, opts.origin));
+// log.info(git.push(opts.master, opts.origin));
 
 log.debug('Pushing tags');
 
-log.info(git.pushTag(opts.master, opts.origin, newTag));
+// log.info(git.pushTag(opts.master, opts.origin, newTag));
