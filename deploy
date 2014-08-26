@@ -103,4 +103,4 @@ log.info(git.push(opts.master, opts.origin));
 
 log.debug('Pushing tags');
 
-log.info(git.pushTags(opts.master, opts.origin));
+log.info(git.pushTag(opts.master, opts.origin, newTag));

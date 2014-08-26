@@ -94,6 +94,17 @@ var shell   = require('shelljs'),
             return result.output.trim();
         },
 
+        pushTag: function(branch, upstream, tag) {
+            result = shell.exec(sprintf('git push %s %s refs/tags/%s', upstream, branch, tag), {silent: true})
+
+            if(0 !== result.code) {
+                log.fatal(sprintf('Could not push tag %s to %s:%s, aborting', tag, upstream, branch));
+                shell.exit(1);
+            }
+
+            return result.output.trim();
+        },
+
         fetchTags: function(branch, upstream) {
             result = shell.exec(sprintf('git fetch %s %s --tags', upstream, branch), {silent: true});
 
