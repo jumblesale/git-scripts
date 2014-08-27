@@ -14,6 +14,12 @@ var shell   = require('shelljs'),
                 .trim();
         },
 
+        checkoutRemoteBranch: function(origin, branch) {
+            return shell.exec(sprintf('git checkout -b %s %s/%s', branch, origin, branch), {silent: true})
+                .output
+                .trim();
+        },
+
         lastTag: function() {
             var tags = shell
                 .exec('git tag -l | sort -V', {silent: true})
@@ -42,7 +48,9 @@ var shell   = require('shelljs'),
                     .trim()
                     .split("\n");
 
-            shell.exec('git reset', {silent: true});
+            if(!files) {
+                return;
+            }
 
             _.each(files, function(file) {
                 var parts  = file.split("\t"),
@@ -50,17 +58,21 @@ var shell   = require('shelljs'),
                     path   = parts[1].trim(),
                     action = diffMap[parts[0]];
 
-                log.info(sprintf('%s: %s', status, path));
-                console.log(action(branch, parts[1]));
+                log.debug(sprintf('%s: %s', status, path));
+                log.info(action(branch, parts[1]));
             });
+        },
+
+        getAuthor: function() {
+            return shell.exec('git show -s --format="%an <%ae>"', {silent: true}).output.trim();
         },
 
         softReset: function(branch) {
             return shell.exec(sprintf('git reset --soft %s', branch), {silent: true}).output.trim();
         },
 
-        commit: function(message) {
-            return shell.exec(sprintf('git commit -m"%s"', message), {silent: true}).output.trim();
+        commit: function(message, author) {
+            return shell.exec(sprintf('git commit -m"%s" --author="%s"', message, author), {silent: true}).output.trim();
         },
 
         lastCommitHash: function() {

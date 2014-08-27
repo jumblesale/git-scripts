@@ -50,6 +50,10 @@ var shell   = require('shelljs'),
 
 dino.say('DEPLOYING'.bold + sprintf(' %s to %s:%s', opts.dev, opts.origin, opts.master));
 
+log.debug('Making sure branch %s/%s exists', opts.origin, opts.dev);
+
+log.debug(git.checkoutRemoteBranch(opts.origin, opts.dev));
+
 log.debug(sprintf('Checking out branch %s', opts.master));
 
 log.info(git.checkout(opts.master));
@@ -83,11 +87,12 @@ log.debug(sprintf('Squashing %s', opts.dev));
 
 git.squashMerge(opts.dev);
 
-var message = opts.message.replace('{VERSION}', newTag);
+var message = opts.message.replace('{VERSION}', newTag),
+    author  = git.getAuthor();
 
-log.info(sprintf('Committing with message: %s', message));
+log.info(sprintf('Committing with author: %s, message: %s', author, message));
 
-log.info(git.commit(message));
+log.info(git.commit(message, author));
 
 log.debug('Tagging new commit...');
 
@@ -95,8 +100,8 @@ git.tag(newTag, newTag, git.lastCommitHash());
 
 log.debug(sprintf('Pushing %s', opts.master));
 
-// log.info(git.push(opts.master, opts.origin));
+log.info(git.push(opts.master, opts.origin));
 
 log.debug('Pushing tags');
 
-// log.info(git.pushTag(opts.master, opts.origin, newTag));
+log.info(git.pushTag(opts.master, opts.origin, newTag));
