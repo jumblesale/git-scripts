@@ -96,7 +96,7 @@ log.debug(sprintf('Squashing %s', opts.dev));
 git.squashMerge(opts.dev);
 
 var message = opts.message.replace('{VERSION}', newTag),
-    author  = git.getAuthor();
+    author  = git.getAuthor(opts.dev);
 
 log.info(sprintf('Committing with author: %s, message: %s', author, message));
 

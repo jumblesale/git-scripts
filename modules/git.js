@@ -66,8 +66,8 @@ var shell   = require('shelljs'),
             });
         },
 
-        getAuthor: function() {
-            return shell.exec('git show -s --format="%an <%ae>"', {silent: true}).output.trim();
+        getAuthor: function(branch) {
+            return shell.exec(sprintf('git show %s -s --format="%an <%ae>"', branch), {silent: true}).output.trim();
         },
 
         softReset: function(branch) {
