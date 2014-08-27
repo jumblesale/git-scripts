@@ -3,6 +3,7 @@
 "use strict"
 
 var GHAPI   = require('github'),
+    shell   = require('shelljs'),
     request = require('request'),
     nom     = require('nomnom'),
     sprintf = require('sprintf-js').sprintf,
@@ -118,10 +119,16 @@ var GHAPI   = require('github'),
     },
 
     pullPR = function(pullRequest) {
-        var sha       = pullRequest.head.sha,
-            localHEAD = git.lastCommitHash();
-        log.info(sprintf('Fetching from %s', opts.origin));
-        log.info(git.fetch(opts.origin));
+        var sha          = pullRequest.head.sha,
+            localHEAD    = git.lastCommitHash(),
+            origin       = pullRequest.head.repo.ssh_url,
+            ref          = pullRequest.head.ref,
+            branchCommit = pullRequest.base.sha;
+        
+        log.info(sprintf('Fetching %s from %s', ref, origin));
+        log.info(git.fetchBranch(origin, ref));
+        log.info(sprintf('Checking out the commit that this PR branched from: %s', branchCommit));
+        log.info(git.checkout(branchCommit));
         log.info('Checking out HEAD of pull request');
         log.info(git.checkout(sha));
         if(false === opts['skip-reset']) {
@@ -137,6 +144,7 @@ var GHAPI   = require('github'),
         var file = fs.readFileSync(sprintf('%s/%s', __dirname, '.token'));
         if(!file) {
             log.fatal('No token specified and could not read .token');
+            shell.exit(1);
         }
         return file;
     }();
