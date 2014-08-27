@@ -53,6 +53,9 @@ var shell   = require('shelljs'),
             }
 
             _.each(files, function(file) {
+                if(!file) {
+                    return;
+                }
                 var parts  = file.split("\t"),
                     status = parts[0].trim(),
                     path   = parts[1].trim(),
