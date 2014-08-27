@@ -54,6 +54,14 @@ log.debug('Making sure branch %s/%s exists', opts.origin, opts.dev);
 
 log.debug(git.checkoutRemoteBranch(opts.origin, opts.dev));
 
+log.debug(sprintf('Checking out branch %s', opts.dev));
+
+log.info(git.checkout(opts.dev));
+
+log.debug('Pulling latest changes');
+
+log.debug(git.pull(opts.dev, opts.origin));
+
 log.debug(sprintf('Checking out branch %s', opts.master));
 
 log.info(git.checkout(opts.master));

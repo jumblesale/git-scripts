@@ -147,6 +147,17 @@ var shell   = require('shelljs'),
             }
 
             return result.output.trim();
+        },
+
+        fetchBranch: function(upstream, branch) {
+            result = shell.exec(sprintf('git fetch %s %s:%s', upstream, branch, branch));
+
+            if(0 !== result.code) {
+                log.fatal(sprintf('Could not fetch %s from %s, aborting', branch, upstream));
+                shell.exit(1);
+            }
+
+            return result.output.trim();
         }
     };
 
