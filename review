@@ -4,7 +4,6 @@
 
 var GHAPI   = require('github'),
     shell   = require('shelljs'),
-    request = require('request'),
     nom     = require('nomnom'),
     sprintf = require('sprintf-js').sprintf,
     _       = require('underscore'),
